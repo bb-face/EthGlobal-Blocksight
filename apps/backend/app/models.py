@@ -1,3 +1,4 @@
+import enum
 import uuid
 
 from pydantic import EmailStr
@@ -111,3 +112,29 @@ class TokenPayload(SQLModel):
 class NewPassword(SQLModel):
     token: str
     new_password: str = Field(min_length=8, max_length=128)
+
+
+# Dao 
+
+class DAOStatus(str, enum.Enum):
+    PENDING = "PENDING"
+    INDEXING = "INDEXING"
+    COMPLETED = "COMPLETED"
+    FAILED = "FAILED"
+
+
+class DAOBase(SQLModel):
+    name: str | None = Field(default=None, max_length=255)
+    contract_address: str = Field(unique=True, index=True, max_length=255)
+    chain: str = Field(default="Ethereum", max_length=100)
+    status: DAOStatus = Field(default=DAOStatus.PENDING)
+
+class DAOCreate(SQLModel):
+    contract_address: str = Field(max_length=255)
+    name: str | None = Field(default=None, max_length=255)
+
+class DAO(DAOBase, table=True):
+    id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
+
+class DAOPublic(DAOBase):
+    id: uuid.UUID

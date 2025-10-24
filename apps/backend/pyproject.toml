@@ -18,6 +18,9 @@ dependencies = [
     "eth-utils>=5.3.1",
     "alchemy-sdk>=0.1.1",
     "dataclass-wizard>=0.35.1",
+    "sqlmodel>=0.0.27",
+    "alembic>=1.17.0",
+    "jwt>=1.4.0",
 ]
 
 [dependency-groups]
