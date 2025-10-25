@@ -133,8 +133,34 @@ class DAOCreate(SQLModel):
     contract_address: str = Field(max_length=255)
     name: str | None = Field(default=None, max_length=255)
 
+class DAOVoteBase(SQLModel):
+    voter_address: str = Field(max_length=42)
+    proposal_id: str = Field(max_length=255)
+    support: int  # 0: against, 1: for, 2: abstain
+    weight: int
+    reason: str | None = Field(default=None)
+    dao_id: uuid.UUID = Field(foreign_key="dao.id")
+
+
+class DAOVoteCreate(DAOVoteBase):
+    pass
+
+
+class DAOVote(DAOVoteBase, table=True):
+    id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
+
+    dao: "DAO" = Relationship(back_populates="votes")
+
+
+class DAOVotePublic(DAOVoteBase):
+    id: uuid.UUID
+
+
 class DAO(DAOBase, table=True):
     id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
+    votes: list["DAOVote"] = Relationship(back_populates="dao", cascade_delete=True)
+
 
 class DAOPublic(DAOBase):
     id: uuid.UUID
+    votes: list[DAOVotePublic] = []

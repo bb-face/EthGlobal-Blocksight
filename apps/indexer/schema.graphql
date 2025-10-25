@@ -1,0 +1,10 @@
+type Vote @entity {
+  id: ID!
+  voter: String!
+  proposalId: BigInt!
+  support: Int!
+  weight: BigInt!
+  reason: String
+  blockTimestamp: BigInt!
+  transactionHash: String!
+}

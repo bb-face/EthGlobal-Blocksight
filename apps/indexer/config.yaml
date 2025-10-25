@@ -1,0 +1,18 @@
+# yaml-language-server: $schema=./node_modules/envio/evm.schema.json
+name: envio-indexer
+contracts:
+  - name: KarratGovernor
+    handler: src/EventHandlers.ts
+    events:
+      - event: VoteCast(address indexed voter, uint256 proposalId, uint8 support, uint256 weight, string reason)
+        field_selection:
+          transaction_fields:
+            - hash
+networks:
+- id: 1
+  start_block: 0
+  rpc: ${RPC_URL_MAINNET}
+  contracts:
+  - name: KarratGovernor
+    address:
+    - 0x9746378F28A5E61efA4fc1a3Ac5Fc178b96474e5

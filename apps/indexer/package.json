@@ -1,0 +1,17 @@
+{
+  "name": "@blocksight/indexer",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "codegen": "envio codegen",
+    "dev": "envio dev",
+    "start": "envio start"
+  },
+  "dependencies": {
+    "envio": "2.31.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.14.2",
+    "typescript": "^5.5.2"
+  }
+}
