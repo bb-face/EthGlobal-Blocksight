@@ -3,12 +3,12 @@ import uuid
 from typing import Any
 
 from fastapi import APIRouter, BackgroundTasks, HTTPException
-from sqlmodel import Session
+from sqlmodel import Session, func, select
 
 from app import crud
 from app.api.deps import SessionDep
 from app.core.db import engine 
-from app.models import DAO, DAOCreate, DAOPublic, DAOStatus
+from app.models import DAO, DAOCreate, DAOPublic, DAOStatus, DAOsPublic
 
 router = APIRouter(prefix="/daos", tags=["daos"])
 

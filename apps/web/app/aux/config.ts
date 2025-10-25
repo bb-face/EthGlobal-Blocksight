@@ -7,5 +7,6 @@ export const config = {
     WALLET_FULL: (address: string, params: string) =>
       `${API_BASE_URL}/api/v1/wallet/${address}/full?${params}`,
     QUERY: `${API_BASE_URL}/api/v1/query`,
+    DAOS: `${API_BASE_URL}/api/v1/daos`,
   },
 };

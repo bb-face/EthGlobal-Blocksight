@@ -48,9 +48,11 @@ export function AddDaoDrawer({ onDaoAdded, children }: AddDaoDrawerProps) {
     const newDao: Dao = {
       id: values.contractAddress,
       name: values.daoName || `DAO (${values.contractAddress.slice(0, 6)}...)`,
-      logoUrl: "/puck-logo.png", // Use a placeholder logo
+      logo_url: "/puck-logo.png", // Use a placeholder logo
       chain: "Ethereum",
-      contractAddress: values.contractAddress,
+      contract_address: values.contractAddress,
+      description: "",
+      status: "PENDING"
     };
     
     onDaoAdded(newDao);

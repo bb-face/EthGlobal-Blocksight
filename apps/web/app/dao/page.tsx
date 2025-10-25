@@ -4,23 +4,62 @@ import { PlusCircle } from 'lucide-react';
 import Image from 'next/image';
 import { useEffect, useState } from 'react';
 
-// Import our new and existing components
 import { Button } from '@/components/ui/button';
 import { Empty, EmptyContent, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from '@/components/ui/empty';
+import { config } from '../aux/config';
 import { AddDaoDrawer } from './_components/AddDaoDrawer';
 import { DaoCard, type Dao } from './_components/DaoCard';
+
+const pucksTips = [
+  "A healthy DAO thrives on participation. Who are your top 10 most active voters?",
+  "Understanding where your members delegate their votes can reveal trust networks.",
+  "High voter apathy? Maybe it's time to analyze the complexity of recent proposals.",
+  "The quietest members might be your biggest untapped resource. What's their on-chain story?",
+  "Track the journey of a proposal from creation to execution. Where are the bottlenecks?",
+];
+
+const PuckMessage = () => {
+  const [tip, setTip] = useState('');
+  useEffect(() => {
+    setTip(pucksTips[Math.floor(Math.random() * pucksTips.length)]);
+  }, []);
+
+  return (
+     <div className="mt-8 bg-linear-to-r from-orange-500/30 to-amber-500/10 border border-orange rounded-lg p-6">
+      <div className="flex items-start gap-4">
+        <span className="text-2xl mt-1">💡</span>
+        <div>
+          <h3 className="text-lg font-bold text-white mb-2">Puck&apos;s Tip</h3>
+          <p className="text-gray-300 leading-relaxed italic">{tip}</p>
+        </div>
+      </div>
+    </div>
+  );
+};
 
 export default function DaoHomePage() {
   const [daos, setDaos] = useState<Dao[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    // Simulate fetching user's existing DAOs from a database.
-    // We start with an empty list to demo the empty state.
-    setTimeout(() => {
-      setDaos([]); 
-      setIsLoading(false);
-    }, 500);
+    async function fetchDaos() {
+      setIsLoading(true);
+      try {
+        const response = await fetch(config.API_ENDPOINTS.DAOS);
+        if (!response.ok) {
+          throw new Error('Failed to fetch DAOs');
+        }
+        const data = await response.json();
+        setDaos(data.data);
+      } catch (error) {
+        console.error("Error fetching DAOs:", error);
+        setDaos([]);
+      } finally {
+        setIsLoading(false);
+      }
+    }
+
+    fetchDaos();
   }, []);
 
   const handleDaoAdded = (newDao: Dao) => {
@@ -38,6 +77,13 @@ export default function DaoHomePage() {
                 <p className="text-sm text-gray-400">Your AI-powered community intelligence hub.</p>
             </div>
           </div>
+          {daos.length > 0 && (
+             <AddDaoDrawer onDaoAdded={handleDaoAdded}>
+                <Button>
+                  <PlusCircle className="mr-2 h-4 w-4" /> Add DAO
+                </Button>
+            </AddDaoDrawer>
+          )}
         </header>
 
         {isLoading ? (
@@ -62,18 +108,14 @@ export default function DaoHomePage() {
             </Empty>
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-8">
-            {daos.map((dao) => (
-              <DaoCard key={dao.id} dao={dao} />
-            ))}
-            {/* "Add New" card in the grid */}
-            <AddDaoDrawer onDaoAdded={handleDaoAdded}>
-              <button className="flex flex-col items-center justify-center h-full border-2 border-dashed border-gray-700 rounded-lg bg-transparent hover:bg-gray-900/50 hover:border-blue-500/50 transition-all">
-                <PlusCircle className="h-12 w-12 text-gray-600 mb-2" />
-                <span className="text-gray-400 font-medium">Add New DAO</span>
-              </button>
-            </AddDaoDrawer>
-          </div>
+          <>
+            <PuckMessage />
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-8">
+              {daos.map((dao) => (
+                <DaoCard key={dao.id} dao={dao} />
+              ))}
+            </div>
+          </>
         )}
       </div>
     </main>
