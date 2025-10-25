@@ -20,19 +20,18 @@ def run_envo_indexing(dao_id: uuid.UUID):
     """
     print(f"Starting indexing for DAO ID: {dao_id}")
     
-    # Create a new session for the background task
     with Session(engine) as session:
         dao = session.get(DAO, dao_id)
         if not dao:
             print(f"DAO {dao_id} not found in background task.")
             return
 
-        # TODO: Replace this sleep with the actual Envio indexing logic.
+        # TODO: Replace actual Envio way to indexing logic.
         # This would involve:
-        # 1. Generating the Envio config file based on the DAO contract address.
+        # 1. Generating or Update Envio config file based on the DAO contract address.
         # 2. Running the Envio process using subprocess.
         print(f"Simulating Envio indexing for {dao.contract_address}...")
-        time.sleep(15) # Simulate a 15-second indexing job
+        time.sleep(15)
 
         # Once done, update the status.
         dao.status = DAOStatus.COMPLETED
@@ -40,7 +39,7 @@ def run_envo_indexing(dao_id: uuid.UUID):
         session.commit()
         print(f"Indexing complete for DAO ID: {dao_id}")
 
-
+# router
 @router.post("/", response_model=DAOPublic)
 def create_dao(
     *,
@@ -58,15 +57,25 @@ def create_dao(
             detail="A DAO with this contract address already exists.",
         )
 
-    # Create the DAO with an initial "INDEXING" status
     new_dao = crud.create_dao(session=session, dao_in=dao_in)
     new_dao.status = DAOStatus.INDEXING
     session.add(new_dao)
     session.commit()
     session.refresh(new_dao)
 
-    # Add the long-running task to the background
     background_tasks.add_task(run_envo_indexing, new_dao.id)
 
-    # Return an immediate response to the user
     return new_dao
+
+@router.get("/", response_model=DAOsPublic)
+def read_daos(session: SessionDep) -> Any:
+    """
+    Retrieve all DAOs.
+    """
+    count_statement = select(func.count()).select_from(DAO)
+    count = session.exec(count_statement).one()
+    
+    statement = select(DAO)
+    daos = session.exec(statement).all()
+    
+    return DAOsPublic(data=daos, count=count)

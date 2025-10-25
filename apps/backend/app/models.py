@@ -1,7 +1,9 @@
 import enum
 import uuid
 
-from pydantic import EmailStr
+from pydantic import EmailStr, HttpUrl
+from sqlalchemy import Column
+from sqlalchemy.dialects.postgresql import JSONB
 from sqlmodel import Field, Relationship, SQLModel
 
 
@@ -125,13 +127,33 @@ class DAOStatus(str, enum.Enum):
 
 class DAOBase(SQLModel):
     name: str | None = Field(default=None, max_length=255)
+    logo_url: str | None = Field(default=None, max_length=255)
     contract_address: str = Field(unique=True, index=True, max_length=255)
     chain: str = Field(default="Ethereum", max_length=100)
     status: DAOStatus = Field(default=DAOStatus.PENDING)
+    description: str | None = Field(default=None) 
+    
+    # Social links as a JSONB field
+    social_links: dict[str, HttpUrl] | None = Field(default=None, sa_column=Column(JSONB))
+
+    # Contract Parameters
+    proposal_threshold: str | None = Field(default=None)
+    votable_supply: str | None = Field(default=None)
+    funding_quorum: str | None = Field(default=None)
+    constitutional_quorum: str | None = Field(default=None)
+    delegated_power: str | None = Field(default=None)
+    proposal_delay: str | None = Field(default=None)
+    voting_period: str | None = Field(default=None)
+
+    # Other Contract Addresses
+    token_address: str | None = Field(default=None, max_length=255)
+    timelock_address: str | None = Field(default=None, max_length=255)
 
 class DAOCreate(SQLModel):
     contract_address: str = Field(max_length=255)
     name: str | None = Field(default=None, max_length=255)
+    logo_url: str | None = Field(default=None, max_length=255)
+    description: str | None = Field(default=None)
 
 class DAOVoteBase(SQLModel):
     voter_address: str = Field(max_length=42)
@@ -164,3 +186,7 @@ class DAO(DAOBase, table=True):
 class DAOPublic(DAOBase):
     id: uuid.UUID
     votes: list[DAOVotePublic] = []
+
+class DAOsPublic(SQLModel):
+    data: list[DAOPublic]
+    count: int
